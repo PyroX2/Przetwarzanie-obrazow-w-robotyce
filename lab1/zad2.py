@@ -9,7 +9,7 @@ slider_values = {"hue": 0.0}
 masking_enabled = False
 
 # Load image
-frame = cv2.imread("example_image.png")
+frame = cv2.imread("example_images/example_image.png")
 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
 frame_shape = frame.shape

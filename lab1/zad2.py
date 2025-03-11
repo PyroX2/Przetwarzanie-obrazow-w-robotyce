@@ -5,20 +5,31 @@ import numpy as np
 dpg.create_context()
 
 # Create sliders
-slider_values = {"hue": 0.0}
+slider_values = {"hue": 0.0, "hue_range": 1.0}
 masking_enabled = False
 
 # Load image
-frame = cv2.imread("example_images/example_image.png")
+frame = cv2.imread("lab1/example_images/example_image.png")
 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
 frame_shape = frame.shape
 
 
 def hsv_processing(frame):
-    color_value = slider_values["hue"]
-    mask = cv2.inRange(frame, (color_value, 0, 0),
-                       (color_value+1, 255, 255))
+    color_value = slider_values["hue"] / 359 * 179
+    hue_range = slider_values["hue_range"] / 359 * 179
+
+    max_value = color_value+hue_range
+    
+    if max_value > 179:
+        mask1 = cv2.inRange(frame, (color_value, 0, 0),
+                            (179, 255, 255))
+        mask2 = cv2.inRange(frame, (0, 0, 0),
+                            (max_value-179, 255, 255))
+        mask = cv2.bitwise_or(mask1, mask2)
+    else:
+        mask = cv2.inRange(frame, (color_value, 0, 0),
+                       (max_value, 255, 255))
     frame = cv2.bitwise_and(frame, frame, mask=mask)
     return frame
 
@@ -66,9 +77,11 @@ with dpg.texture_registry(show=False):
     )
 # Slider GUI
 with dpg.window(label="Slider GUI", width=500, height=600, tag="Primary Window"):
-    for key in slider_values.keys():
-        dpg.add_slider_int(label=f"{key}", default_value=0.0, min_value=0, max_value=179,
-                           tag=key, callback=update_value, width=500, height=500)
+    
+    dpg.add_slider_int(label="Hue", default_value=0.0, min_value=0, max_value=359,
+                        tag="hue", callback=update_value, width=500, height=500)
+    dpg.add_slider_int(label="Hue Range", default_value=1.0, min_value=1, max_value=359,
+                        tag="hue_range", callback=update_value, width=500, height=500)
     masking_button = dpg.add_button(
         tag="enable_masking", label="Enable masking")
     dpg.set_item_callback(masking_button, button_callback)

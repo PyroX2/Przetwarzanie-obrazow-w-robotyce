@@ -15,12 +15,14 @@ frame = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
 frame_shape = frame.shape
 
 
+# Process HSV image
 def hsv_processing(frame):
     color_value = slider_values["hue"] / 359 * 179
     hue_range = slider_values["hue_range"] / 359 * 179
 
     max_value = color_value+hue_range
     
+    # If range is over 179 get the mask to 179 and from 0
     if max_value > 179:
         mask1 = cv2.inRange(frame, (color_value, 0, 0),
                             (179, 255, 255))
@@ -52,6 +54,7 @@ def update_value(sender, app_data):
     change_image()  # Update image
 
 
+# Change the image
 def change_image():
     processed_image = frame.copy()
     processed_image = cv2.cvtColor(processed_image, cv2.COLOR_RGB2HSV)
@@ -65,6 +68,7 @@ def change_image():
     dpg.set_value("image", processed_image)
 
 
+# Add image texture
 with dpg.texture_registry(show=False):
     frame_normalized = np.asarray(
         frame, dtype=np.float32) / 255.0  # Normalize to 0-1
@@ -75,6 +79,7 @@ with dpg.texture_registry(show=False):
         tag="image",
         format=dpg.mvFormat_Float_rgb
     )
+    
 # Slider GUI
 with dpg.window(label="Slider GUI", width=500, height=600, tag="Primary Window"):
     

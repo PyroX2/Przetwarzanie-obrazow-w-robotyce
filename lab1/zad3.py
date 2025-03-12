@@ -7,7 +7,6 @@ slider_values = {"clip_limit": 5, "tile_grid_size": 8}
 hist_eq_enabled = False
 clahe_enabled = False
 
-# read a image using imread
 original_frame = cv2.imread('lab1/example_images/low_contrast.jpeg')
 original_frame = cv2.resize(original_frame, (0, 0), fx=0.3, fy=0.3)
 original_frame = cv2.cvtColor(original_frame, cv2.COLOR_BGR2RGB)
@@ -28,7 +27,7 @@ def clahe(frame):
     return cv2.cvtColor(frame, cv2.COLOR_HSV2BGR)
 
 
-# Callback for enabling and disabling masking
+# Callback for enabling and disabling histogram equalization
 def button_callback(sender, app_data, user_data):
     global hist_eq_enabled
     hist_eq_enabled = not hist_eq_enabled
@@ -38,7 +37,7 @@ def button_callback(sender, app_data, user_data):
         dpg.set_item_label(sender, "Enable equalization")
     change_image()
 
-# Callback for enabling and disabling masking
+# Callback for enabling and disabling CLAHE
 def clahe_button_callback(sender, app_data, user_data):
     global clahe_enabled
     clahe_enabled = not clahe_enabled
@@ -56,6 +55,7 @@ def update_value(sender, app_data):
     change_image()  # Update image
 
 
+# Change the image
 def change_image():
     processed_image = original_frame.copy()
 
@@ -70,6 +70,7 @@ def change_image():
     dpg.set_value("processed_image", processed_image)
 
 
+# Add textures with the original and processed images
 with dpg.texture_registry(show=False):
     frame_normalized = np.asarray(
         original_frame, dtype=np.float32) / 255.0  # Normalize to 0-1
@@ -87,11 +88,14 @@ with dpg.texture_registry(show=False):
         tag="processed_image",
         format=dpg.mvFormat_Float_rgb
     )
+    
 # Slider GUI
 with dpg.window(label="Slider GUI", width=500, height=600, tag="Primary Window"):
-    for key in slider_values.keys():
-        dpg.add_slider_int(label=f"{key}", default_value=0.0, min_value=1, max_value=20,
-                           tag=key, callback=update_value, width=500, height=500)
+    dpg.add_slider_int(label="Clip limit", default_value=0.0, min_value=1, max_value=50,
+                        tag="clip_limit", callback=update_value, width=500, height=500)
+    
+    dpg.add_slider_int(label="Tile grid size", default_value=0.0, min_value=1, max_value=100,
+                        tag="tile_grid_size", callback=update_value, width=500, height=500)
     
     eq_button = dpg.add_button(
         tag="enable_masking", label="Enable equalization")
@@ -111,7 +115,7 @@ with dpg.window(label="Image Viewer", width=2*frame_shape[1], height=frame_shape
 
 # Setup viewport
 dpg.create_viewport(title='Lab1', width=800 +
-                    frame_shape[1], height=frame_shape[0]+50)
+                    2*frame_shape[1], height=frame_shape[0]+50)
 dpg.setup_dearpygui()
 dpg.set_global_font_scale(3)
 dpg.set_primary_window("Primary Window", True)
